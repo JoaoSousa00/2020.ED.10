@@ -1,8 +1,11 @@
 package Tests;
 
 import Exceptions.ElementNotFoundException;
+import Exceptions.EmptyCollectionException;
 import Heaps.ArrayHeap;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <h3>
@@ -33,13 +36,50 @@ public class Test1 {
                 switch (b) {
                     case 1:
                         ArrayHeap heap = new ArrayHeap();
-                        System.out.println("GetH| Should be 0 and is ..." + heap.getH());
+                         {
+                            try {
+                                System.err.println("RemoveMin| Should throw 'EmptyCollectionException' and ..." + heap.removeMin());
+                            } catch (EmptyCollectionException ex) {
+                                System.out.println("Empty Collection");
+                                System.out.println("FindMin| Should return null and is..." + heap.findMin());
+                            }
+                        }
                         break;
 
                     case 2:
+
+                        ArrayHeap heap2 = new ArrayHeap();
+                        heap2.addElement(3);
+                        System.out.println("FindMin| Should return 3 and is..." + heap2.findMin());
+                        try {
+                            System.out.println("RemoveMin| Should return 3 and is..." + heap2.removeMin());
+                        } catch (EmptyCollectionException ex) {
+                            System.err.println("Shouldnt Throw here...");
+                        }
+                        try {
+                            System.err.println("RemoveMin| Should throw 'EmptyCollectionException' and ..." + heap2.removeMin());
+                        } catch (EmptyCollectionException ex) {
+                            System.out.println("Empty Collection");
+                        }
                         break;
 
                     case 3:
+                        
+                        ArrayHeap heap3 = new ArrayHeap();
+                        heap3.addElement(3);
+                        heap3.addElement(7);
+                        heap3.addElement(5);
+                        heap3.addElement(2);
+                        heap3.addElement(7);
+                        heap3.addElement(9);
+                        System.out.println("FindMin| Should return 3 and is..." + heap3.findMin());
+                        try {
+                            System.out.println("RemoveMin| Should return 3 and is..." + heap3.removeMin());
+                            System.out.println("RemoveMin| Should return 3 and is..." + heap3.removeMin());
+                            System.out.println("RemoveMin| Should return 3 and is..." + heap3.removeMin());
+                        } catch (EmptyCollectionException ex) {
+                            System.err.println("Shouldnt Throw here...");
+                        }
                         break;
                 }
                 break;
