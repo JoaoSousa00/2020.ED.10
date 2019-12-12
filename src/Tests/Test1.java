@@ -32,7 +32,7 @@ public class Test1 {
                 int b = scanner.nextInt(4);
                 switch (b) {
                     case 1:
-                        ArrayHeap heap = new ArrayHeap(20);
+                        ArrayHeap heap = new ArrayHeap();
                         System.out.println("GetH| Should be 0 and is ..." + heap.getH());
                         break;
 

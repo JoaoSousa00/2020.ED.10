@@ -1,11 +1,8 @@
 package Heaps;
 
-import Exceptions.ElementNotFoundException;
 import Exceptions.EmptyCollectionException;
-import Interfaces.BinaryTreeADT;
 import Interfaces.HeapADT;
-import Lists.ArrayUnorderedList;
-import java.util.Iterator;
+import Trees.ArrayBinaryTree;
 
 /**
  * <h3>
@@ -21,170 +18,116 @@ import java.util.Iterator;
  * Class that represents
  * </p>
  */
-public class ArrayHeap<T> implements BinaryTreeADT<T>, HeapADT<T> {
-
-    private final int CAPACITY = 50;
-    protected T array[];
-    protected int count;
-    private int h;
+/**
+ * ArrayHeap provides an array implementation of a minheap.
+ *
+ */
+public class ArrayHeap<T> extends ArrayBinaryTree<T> implements HeapADT<T> {
 
     public ArrayHeap() {
-        this.array = (T[]) new Object[CAPACITY];
-        count = 0;
-    }
-
-    public ArrayHeap(int GIVEN_CAPACITY) {
-        this.array = (T[]) new Object[GIVEN_CAPACITY];
-        count = 0;
-    }
-
-    @Override
-    public T getRoot() {
-        return array[0];
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return (count == 0);
-    }
-
-    @Override
-    public int size() {
-        return count;
-    }
-
-    @Override
-    public boolean contains(T targetElement) {
-        try {
-            find(targetElement);
-        } catch (ElementNotFoundException ex) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public T find(T targetElement) throws ElementNotFoundException {
-        T temp = null;
-        boolean found = false;
-
-        for (int ct = 0; ct < array.length && !found; ct++) {
-            if (targetElement.equals(array[ct])) {
-                found = true;
-                temp = array[ct];
-            }
-        }
-        if (!found) {
-            throw new ElementNotFoundException("Binary tree");
-        }
-        return temp;
-    }
-
-    @Override
-    public Iterator<T> iteratorInOrder() {
-        ArrayUnorderedList<T> templist = new ArrayUnorderedList<>();
-        inorder(0, templist);
-        return templist.iterator();
-
+        super();
     }
 
     /**
-     * Performs a recursive inorder traversal.
+     * Adds the specified element to this heap in the appropriate position
+     * according to its key value. Note that equal elements are added to the
+     * right.
      *
-     * @param node the node used in the traversal
-     * @param templist the temporary list used in the traversal
+     * @param obj the element to be added to this heap
      */
-    protected void inorder(int node, ArrayUnorderedList<T> templist) {
-        if (node < array.length) {
-            if (array[node] != null) {
-                inorder(node * 2 + 1, templist);
-                templist.addToRear(array[node]);
-                inorder((node + 1) * 2, templist);
-            }
-        }
-    }
-
-    @Override
-    public Iterator<T> iteratorPreOrder() {
-        ArrayUnorderedList<T> templist = new ArrayUnorderedList<>();
-        preorder(0, templist);
-        return templist.iterator();
-    }
-
-    /**
-     * Performs a recursive preorder traversal.
-     *
-     * @param node the node used in the traversal
-     * @param templist the temporary list used in the traversal
-     */
-    protected void preorder(int node, ArrayUnorderedList<T> templist) {
-        if (node < array.length) {
-            if (array[node] != null) {
-                templist.addToRear(array[node]);
-                preorder(node * 2 + 1, templist);
-                preorder((node + 1) * 2, templist);
-            }
-        }
-    }
-
-    @Override
-    public Iterator<T> iteratorPostOrder() {
-        ArrayUnorderedList<T> templist = new ArrayUnorderedList<>();
-        postorder(0, templist);
-        return templist.iterator();
-    }
-
-    /**
-     * Performs a recursive postorder traversal.
-     *
-     * @param node the node used in the traversal
-     * @param templist the temporary list used in the traversal
-     */
-    protected void postorder(int node, ArrayUnorderedList<T> templist) {
-        if (node < array.length) {
-            if (array[node] != null) {
-                postorder(node * 2 + 1, templist);
-                postorder((node + 1) * 2, templist);
-                templist.addToRear(array[node]);
-            }
-        }
-    }
-
-    @Override
-    public Iterator<T> iteratorLevelOrder() throws EmptyCollectionException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     @Override
     public void addElement(T obj) {
-        Comparable toadd = (Comparable) obj;
-        if (isEmpty()) {
-            array[0] = obj;
-        } else if (false) {
-
+        if (count == tree.length) {
+            expandCapacity();
+        }
+        tree[count] = obj;
+        count++;
+        if (count > 1) {
+            heapifyAdd();
         }
     }
 
-    protected void refreshHeight() {
-        h = (int) Math.ceil(Math.log(count + 1) / Math.log(2)) - 1;
+    /**
+     * Reorders this heap to maintain the ordering property after adding a node.
+     */
+    private void heapifyAdd() {
+        T temp;
+        int next = count - 1;
 
+        temp = tree[next];
+
+        while ((next != 0) && (((Comparable) temp).compareTo(tree[(next - 1) / 2]) < 0)) {
+            tree[next] = tree[(next - 1) / 2];
+            next = (next - 1) / 2;
+        }
+        tree[next] = temp;
     }
 
+    /**
+     * Remove the element with the lowest value in this heap and returns a
+     * reference to it. Throws an EmptyCollectionException if the heap is empty.
+     *
+     * @return a reference to the element with the lowest value in this head
+     * @throws EmptyCollectionException if an empty collection exception occurs
+     */
     @Override
-    public T removeMin() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public T removeMin() throws EmptyCollectionException {
+        if (isEmpty()) {
+            throw new EmptyCollectionException("Empty Heap");
+        }
+        T minElement = tree[0];
+        tree[0] = tree[count - 1];
+        heapifyRemove();
+        count--;
+
+        return minElement;
+    }
+
+    /**
+     * Reorders this heap to maintain the ordering property.
+     */
+    private void heapifyRemove() {
+        T temp;
+        int node = 0;
+        int left = 1;
+        int right = 2;
+        int next;
+
+        if ((tree[left] == null) && (tree[right] == null)) {
+            next = count;
+        } else if (tree[left] == null) {
+            next = right;
+        } else if (tree[right] == null) {
+            next = left;
+        } else if (((Comparable) tree[left]).compareTo(tree[right]) < 0) {
+            next = left;
+        } else {
+            next = right;
+        }
+        temp = tree[node];
+
+        while ((next < count) && (((Comparable) tree[next]).compareTo(temp) < 0)) {
+            tree[node] = tree[next];
+            node = next;
+            left = 2 * node + 1;
+            right = 2 * (node + 1);
+            if ((tree[left] == null) && (tree[right] == null)) {
+                next = count;
+            } else if (tree[left] == null) {
+                next = right;
+            } else if (tree[right] == null) {
+                next = left;
+            } else if (((Comparable) tree[left]).compareTo(tree[right]) < 0) {
+                next = left;
+            } else {
+                next = right;
+            }
+        }
+        tree[node] = temp;
     }
 
     @Override
     public T findMin() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return tree[0];
     }
-
-    /**
-     * @return the h
-     */
-    public int getH() {
-        return h;
-    }
-
 }
